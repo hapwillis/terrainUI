@@ -15,7 +15,8 @@
 		'use strict';
 		if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 		// Globally used THREE.js objects here
-		let camera, scene, renderer, terrainVertexBuffer;
+		let camera, scene, renderer, terrainMesh, terrainVertexBuffer, terrainCenter;
+		let cellWidth = 5;
 		let mouseStart = {x: 0, y: 0};
 		let mouseDelta = {x: 0, y: 0};
 		let trackActive = false;
@@ -31,20 +32,18 @@
 			scene = new THREE.Scene();
 			camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
 			camera.position.y = 1;
-			// callback for mouse movement (click + drag) performs rotations
 			document.addEventListener("mousedown", mouseDownHandler);
 			document.addEventListener("mouseup", mouseUpHandler);
 			document.addEventListener("mousemove", mouseMoveHandler);
-			// callback for WS moves camera along camera.getWorldDirection
-			// callback for AD moves camera along camera.getWorldDirection.cross(camera.up)
 			document.addEventListener("keydown", keyDownHandler);
 			document.addEventListener("keyup", keyUpHandler);
 
 			terrainVertexBuffer = new THREE.PlaneBufferGeometry( 20, 20, 32 );
 			var material = new THREE.MeshBasicMaterial( {color: 0xD3D3D3, side: THREE.DoubleSide} );
-			var plane = new THREE.Mesh( terrainVertexBuffer, material );
-			plane.lookAt(0.0, 1.0, 0.0);
-			scene.add( plane );
+			terrainMesh = new THREE.Mesh( terrainVertexBuffer, material );
+			terrainMesh.lookAt(0.0, 1.0, 0.0);
+			scene.add( terrainMesh );
+			terrainCenter = terrainMesh.position;
 
 			renderer = new THREE.WebGLRenderer();
 			renderer.setSize( window.innerWidth, window.innerHeight );
@@ -66,7 +65,27 @@
 			camera.translateZ(movementScale * cameraMovement.longitudinal);
 			camera.translateX(movementScale * cameraMovement.lateral);
 
+			updateTerrain();
+
 			renderer.render( scene, camera );
+		}
+
+		function updateTerrain() {
+			if (getFlatDistance(camera.position, terrainCenter) > cellWidth) {
+				terrainVertexBuffer = new THREE.PlaneBufferGeometry( 20, 20, 32 );
+				terrainMesh.geometry = terrainVertexBuffer;
+
+				terrainMesh.position.x = 5 * Math.round(camera.position.x / 5);
+				terrainMesh.position.z = 5 * Math.round(camera.position.z / 5);
+				terrainCenter = terrainMesh.position;
+			}
+		}
+
+		function getFlatDistance (posA, posB) {
+			let xDist = posB.x - posA.x;
+			let zDist = posB.z - posA.z;
+
+			return Math.sqrt(Math.pow(xDist, 2) + Math.pow(zDist, 2));
 		}
 
 		function onWindowResize() {
