@@ -40,37 +40,6 @@
 			document.body.appendChild( renderer.domElement );
 		}
 
-		function subdividePlane(planeBuffer) {
-			if (!planeBuffer.isBufferGeometry){return;}
-
-			var vertPositions = planeBuffer.getAttribute('position').array;
-			var vertColors = planeBuffer.getAttribute('color').array;
-			var indices = planebuffer.getIndex().array;
-
-			// insert subdivided vertices with splice
-
-			planeBuffer.getAttribute('position').needsUpdate = true;
-			planeBuffer.getAttribute('color').needsUpdate = true;
-			planebuffer.getIndex().needsUpdate = true;
-			planeBuffer.computeVertexNormals();
-		}
-
-		// opposite of subdividePlane
-		function decimatePlane(planeBuffer) {
-			if (!planeBuffer.isBufferGeometry){return;}
-
-			var vertPositions = planeBuffer.getAttribute('position').array;
-			var vertColors = planeBuffer.getAttribute('color').array;
-			var indices = planebuffer.getIndex().array;
-
-			// remove subdivided vertices
-
-			planeBuffer.getAttribute('position').needsUpdate = true;
-			planeBuffer.getAttribute('color').needsUpdate = true;
-			planebuffer.getIndex().needsUpdate = true;
-			planeBuffer.computeVertexNormals();
-		}
-
 		function animate() {
 			requestAnimationFrame( animate );
 			renderer.render( scene, camera );
